@@ -232,13 +232,13 @@ function streakEvent() {
     if (currentStreak.streak >= minStreak && streakEnabled == 1) {
         $("#main").empty();
         $("#main").css("position", "absolute");
-        $("#main").css("top", "600");
-        $("#main").css("left", "35");
+        //$("#main").css("left", "35"); // 35
+        //$("#main").css("bottom", "35"); // 70
         var img = $("<img />", { src: currentStreak.emoteURL });
         img.appendTo("#main");
         var streakLength = $("#main").append(" 󠀀  󠀀  x" + currentStreak.streak + " streak!");
         streakLength.appendTo("#main");
-        gsap.to("#main", 0.15, { scaleX: 1.2, scaleY: 1.2, onComplete: downscale });
+        gsap.to("#main", 0.2, { scaleX: 1.2, scaleY: 1.2, onComplete: downscale });
         function downscale() {
             gsap.to("#main", 0.15, { scaleX: 1, scaleY: 1 });
         }
@@ -246,7 +246,7 @@ function streakEvent() {
         setInterval(() => {
             if ((new Date().getTime() - streakCD) / 1000 > 4) {
                 streakCD = new Date().getTime();
-                gsap.to("#main", 0.2, { scaleX: 0, scaleY: 0, delay: 0.5, onComplete: remove });
+                gsap.to("#main", 0.2, { x: 0, y: 0, scaleX: 0, scaleY: 0, delay: 0.5, onComplete: remove });
                 function remove() {
                     streakCD = new Date().getTime();
                 }
@@ -296,23 +296,24 @@ function showEmoteEvent(emote) {
     if (secondsDiff > parseInt(showEmoteCooldown)) {
         showEmoteCooldownRef = new Date();
         var image = emote.emoteURL;
-        var max_height = 720;
-        var max_width = 1280;
-        function getRandomCoords() {
-            var r = [];
-            var x = Math.floor(Math.random() * max_width);
-            var y = Math.floor(Math.random() * max_height);
-
-            r = [x, y];
-            return r;
-        }
+        var max_height = 1080;
+        var max_width = 1920;
         function createImage() {
             $("#showEmote").empty();
-            var xy = getRandomCoords();
-            $("#showEmote").css("position", "absolute");
-            $("#showEmote").css("top", xy[1] + "px");
-            $("#showEmote").css("left", xy[0] + "px");
-            log("creating showEmote");
+            let x = Math.floor(Math.random() * max_width);
+            let y = Math.floor(Math.random() * max_height);
+            let emoteEl = $("#showEmote");
+            emoteEl.css("position", "absolute");
+            if (x > max_width / 2) {
+              emoteEl.css("left", x + "px");
+            } else {
+              emoteEl.css("right", (max_width - x) + "px");
+            }
+            if (x > max_width / 2) {
+              emoteEl.css("top", y + "px");
+            } else {
+              emoteEl.css("bottom", (max_height - y) + "px");
+            }            log("creating showEmote");
             var img = $("<img />", { src: image, style: `transform: scale(${showEmoteSizeMultiplier}, ${showEmoteSizeMultiplier})` });
             img.appendTo("#showEmote");
             gsap.to("#showEmote", 1, { autoAlpha: 1, onComplete: anim2 });
@@ -325,6 +326,21 @@ function showEmoteEvent(emote) {
         }
         createImage();
     }
+}
+
+document.onchatmessage = function(message, messageFull) {
+  //console.log('message', message);
+  //console.log('messageFull', messageFull);
+  let lower = message.toLowerCase();
+  if (lower.startsWith("!showemote")
+    || lower.startsWith("!#showemote")
+    || lower.startsWith("!showe")
+    || lower.startsWith("!show")
+    || lower.startsWith("!s")
+  ) {
+      showEmote(message, messageFull);
+  }
+  findEmotes(message, messageFull);
 }
 
 // Connecting to twitch chat
@@ -356,10 +372,7 @@ function connect() {
         if (messageFull.length > 12) {
             let messageBefore = messageFull[messageFull.length - 1].split(`${channel} :`).pop(); // gets the raw message
             let message = messageBefore.split(" ").includes("ACTION") ? messageBefore.split("ACTION ").pop().split("")[0] : messageBefore; // checks for the /me ACTION usage and gets the specific message
-            if (message.toLowerCase().startsWith("!showemote") || message.toLowerCase().startsWith("!#showemote")) {
-                showEmote(message, messageFull);
-            }
-            findEmotes(message, messageFull);
+            document.onchatmessage(message, messageFull);
         }
         if (messageFull.length == 1 && messageFull[0].startsWith("PING")) {
             log("sending pong");
