@@ -296,7 +296,7 @@ class Emotes {
     }
 }
 
-class Display {
+class EmoteShower {
     /**
      * @type {Settings}
      */
@@ -509,7 +509,7 @@ class ChatClient {
     #websocket = null
 
     /**
-     * @type {Display}
+     * @type {EmoteShower}
      */
     #display = null
 
@@ -518,7 +518,7 @@ class ChatClient {
 
     /**
      * @param {Settings} settings 
-     * @param {Display} display
+     * @param {EmoteShower} display
      * @param {StreakTracker} streakTracker
      */
     constructor(settings, display, streakTracker) {
@@ -619,7 +619,7 @@ class ChatClient {
     let emotes = new Emotes(settings.channel)
     await emotes.init()
 
-    let display = new Display(settings, emotes)
+    let display = new EmoteShower(settings, emotes)
     let streakTracker = new StreakTracker(settings, emotes)
 
     let chat = new ChatClient(settings, display, streakTracker)
