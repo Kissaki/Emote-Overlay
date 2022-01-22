@@ -5,6 +5,7 @@ class Settings {
     constructor() {
         this.parseFromURL()
         this.validate()
+        console.debug('Using settings', this)
     }
     parseFromURL() {
         let params = new URL(document.location).searchParams
@@ -12,34 +13,20 @@ class Settings {
         this.channel = params.get("channel")?.toLowerCase()
 
         // show emote streaks
-        this.streakEnabled = params.get("streakEnabled", 1); 
-        this.minStreak = params.get("minStreak") ?? 5
+        this.streakEnabled = !params.has("streakEnabled") || params.get('streakEnabled') != 0
+        this.minStreak = parseInt(params.get("minStreak") ?? 5)
 
         // enable show emote command
-        this.showEmoteEnabled = params.get("showEmoteEnabled") ?? 1
-        this.showEmoteSizeMultiplier = params.get("showEmoteSizeMultiplier") ?? 1
-        this.showEmoteCooldown = params.get("showEmoteCooldown", 6);
+        this.showEmoteEnabled = !params.has("showEmoteEnabled") || params.get("showEmoteEnabled") != 0
+        this.showEmoteSizeMultiplier = parseFloat(params.get("showEmoteSizeMultiplier") ?? 1.0)
+        this.showEmoteCooldown = parseFloat(params.get("showEmoteCooldown") ?? 6.0)
 
-        this.sevenTVEnabled = params.get("7tv") ?? 0
+        this.sevenTVEnabled = !params.has("7tv") || params.get("7tv") != 0
 
         this.debug = params.has("debug")
     }
     validate() {
         if (this.channel === null) throw 'Missing required `channel` configuration'
-    }
-}
-
-class Logger {
-    #debug = false
-    /**
-     * @param {boolean} enableDebug 
-     */
-    constructor(enableDebug) {
-        this.#debug = enableDebug
-    }
-    debug(message) {
-        if (!this.#debug) return
-        console.log(message)
     }
 }
 
@@ -355,11 +342,11 @@ class EmoteShower {
      * @param {Emote} emote 
      */
     #showEmoteEvent(emote) {
-        let secondsDiff = (new Date().getTime() - new Date(this.#showEmoteCooldownRef).getTime()) / 1000;
-        console.debug(`showEmote command time since last invocation: ${secondsDiff}s`)
-
         const cooldown = parseInt(this.#settings.showEmoteCooldown)
+        let secondsDiff = (new Date().getTime() - this.#showEmoteCooldownRef.getTime()) / 1000;
+        console.debug(`showEmote command time since last invocation: ${secondsDiff}s (cooldown ${cooldown})`)
         if (cooldown > secondsDiff) return
+
         this.#showEmoteCooldownRef = new Date();
 
         this.#createImage(emote)
@@ -457,16 +444,19 @@ class StreakTracker {
         if (this.currentStreak.streak < this.#settings.minStreak) return
 
         console.debug(`Streak event with a ${this.currentStreak.streak} streak`)
-        $("#main").empty();
+        const domEl = document.getElementById('main')
+        domEl.innerText = ''
 
-        $("#main").css("position", "absolute");
+        const imgEl = document.createElement('img')
+        imgEl.src = this.currentStreak.emoteURL
+        domEl.appendChild(imgEl)
+
+        const text = ` 󠀀  󠀀  x ${this.currentStreak.streak} streak!`
+
+        domEl.innerHTML += text
+
         //$("#main").css("left", "35"); // 35
         //$("#main").css("bottom", "35"); // 70
-        const img = $("<img />", { src: this.currentStreak.emoteURL })
-        img.appendTo("#main")
-
-        const streakLength = $("#main").append(" 󠀀  󠀀  x" + currentStreak.streak + " streak!")
-        streakLength.appendTo("#main")
 
         gsap.to("#main", 0.2, {
             scaleX: 1.2,
@@ -610,12 +600,11 @@ class ChatClient {
 
 (async () => {
     let settings = new Settings()
-    let logger = new Logger(settings.debug)
 
     console.info(`Using channel ${settings.channel}`, settings)
     console.info(`The streak module is ${settings.streakEnabled} and the showEmote module is ${settings.showEmoteEnabled}`);
 
-    let emotes = new Emotes(settings.channel)
+    let emotes = new Emotes(settings.channel, settings.enable7TV)
     await emotes.init()
 
     let display = new EmoteShower(settings, emotes)
@@ -626,4 +615,3 @@ class ChatClient {
         chat.connect()
     }, 10 * 1000)
 })()
-

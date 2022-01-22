@@ -9,6 +9,9 @@ body { position: relative; }
   text-transform: uppercase;
   text-shadow: 1px 1px 2px #333, 0px 0px 1px #555;
 }
+#main {
+  position: absolute;
+}
 .showEmote {
   position: absolute;
   opacity: 0;
