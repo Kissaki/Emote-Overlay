@@ -9,11 +9,11 @@ body { position: relative; }
   text-transform: uppercase;
   text-shadow: 1px 1px 2px #333, 0px 0px 1px #555;
 }
-#showEmote {
+.showEmote {
   position: absolute;
   opacity: 0;
   transition: opacity 1s;
 }
-#showEmote.visible {
+.showEmote.visible {
   opacity: 1;
 }

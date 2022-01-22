@@ -368,37 +368,36 @@ class EmoteShower {
      * @param {Emote} emote 
      */
     #createImage(emote) {
-        const emoteDomEl = document.getElementById('showEmote')
-        const emoteEl = $("#showEmote")
+        console.debug(`creating showEmote for ${emote.emoteName}…`)
+        const minMargin = 8
+        const transitionDurationS = 1
+        const visibleDuration = 5000
+        const emoteDomEl = document.createElement('img')
+        emoteDomEl.classList.add('showEmote')
+        emoteDomEl.src = emote.emoteURL
+        emoteDomEl.style.transform = `scale(${this.#settings.showEmoteSizeMultiplier}, ${this.#settings.showEmoteSizeMultiplier})`
+        emoteDomEl.style.transition = `transition: opacity ${transitionDurationS}s ease-in-out`
+        document.body.appendChild(emoteDomEl)
 
-        emoteDomEl.innerText = ''
+        const max_height = document.body.offsetHeight - 2 * minMargin
+        const max_width = document.body.offsetWidth - 2 * minMargin
 
-        const max_height = document.body.offsetHeight
-        const max_width = document.body.offsetWidth
-
-        let x = Math.floor(Math.random() * max_width)
-        let y = Math.floor(Math.random() * max_height)
-        emoteEl.css("position", "absolute")
+        let x = minMargin + Math.floor(Math.random() * max_width)
+        let y = minMargin + Math.floor(Math.random() * max_height)
         if (x < max_width / 2) {
-            emoteEl.css("left", x + "px")
+            emoteDomEl.style.left = `${x}px`
         } else {
-            emoteEl.css("right", (max_width - x) + "px")
+            emoteDomEl.style.right = `${max_width - x}px`
         }
         if (x < max_width / 2) {
-            emoteEl.css("top", y + "px")
+            emoteDomEl.style.top = `${y}px`
         } else {
-            emoteEl.css("bottom", (max_height - y) + "px")
+            emoteDomEl.style.bottom = `${max_height - y}px`
         }
-
-        console.debug(`creating showEmote ${emote.emoteName}`)
-        const img = $("<img />", { 
-            src: emote.emoteURL,
-            style: `transform: scale(${this.#settings.showEmoteSizeMultiplier}, ${this.#settings.showEmoteSizeMultiplier})`
-         })
-        img.appendTo("#showEmote")
 
         emoteDomEl.classList.add('visible')
-        setTimeout(() => emoteDomEl.classList.remove('visible'), 5000)
+        setTimeout(() => emoteDomEl.classList.remove('visible'), visibleDuration)
+        setTimeout(() => emoteDomEl.remove(), visibleDuration + 3 * transitionDurationS * 1000)
     }
 }
 
