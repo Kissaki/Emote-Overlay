@@ -288,23 +288,11 @@ class Emotes {
      */
     findFirstEmoteInMessage(words) {
         for (const emote of this.emotes) {
-            if (words.includes(emote)) {
+            if (words.includes(emote.emoteName)) {
                 return emote
             }
         }
         return null
-    }
-    /**
-     * @param {string} emoteName
-     * @returns {string} emote URL
-     */
-    findEmoteURLInEmotes(emote) {
-        for (const emoteObj of this.emotes) {
-            if (emoteObj.emoteName == emote) {
-                return emoteObj.emoteURL
-            }
-        }
-        return null;
     }
 }
 
@@ -374,40 +362,43 @@ class Display {
         if (cooldown > secondsDiff) return
         this.#showEmoteCooldownRef = new Date();
 
-        createImage(emote);
+        this.createImage(emote)
     }
     /**
      * @param {Emote} emote 
      */
     createImage(emote) {
-        $("#showEmote").empty()
+        const emoteDomEl = document.getElementById('showEmote')
+        const emoteEl = $("#showEmote")
 
-        const max_height = 1080;
-        const max_width = 1920;
+        emoteDomEl.innerText = ''
 
-        let x = Math.floor(Math.random() * max_width);
-        let y = Math.floor(Math.random() * max_height);
-        let emoteEl = $("#showEmote");
-        emoteEl.css("position", "absolute");
-        if (x > max_width / 2) {
-            emoteEl.css("left", x + "px");
+        const max_height = document.body.offsetHeight
+        const max_width = document.body.offsetWidth
+
+        let x = Math.floor(Math.random() * max_width)
+        let y = Math.floor(Math.random() * max_height)
+        emoteEl.css("position", "absolute")
+        if (x < max_width / 2) {
+            emoteEl.css("left", x + "px")
         } else {
-            emoteEl.css("right", (max_width - x) + "px");
+            emoteEl.css("right", (max_width - x) + "px")
         }
-        if (x > max_width / 2) {
-            emoteEl.css("top", y + "px");
+        if (x < max_width / 2) {
+            emoteEl.css("top", y + "px")
         } else {
-            emoteEl.css("bottom", (max_height - y) + "px");
+            emoteEl.css("bottom", (max_height - y) + "px")
         }
 
-        console.debug(`creating showEmote ${emote.emoteName}`);
+        console.debug(`creating showEmote ${emote.emoteName}`)
         const img = $("<img />", { 
             src: emote.emoteURL,
             style: `transform: scale(${this.#settings.showEmoteSizeMultiplier}, ${this.#settings.showEmoteSizeMultiplier})`
          })
-        img.appendTo("#showEmote");
+        img.appendTo("#showEmote")
 
-        gsap.to("#showEmote", 1, { autoAlpha: 1, onComplete: () => gsap.to("#showEmote", 1, { autoAlpha: 0, delay: 4, onComplete: () => $("#showEmote").empty() }) });
+        emoteDomEl.classList.add('visible')
+        setTimeout(() => emoteDomEl.classList.remove('visible'), 5000)
     }
 }
 
@@ -590,7 +581,7 @@ class ChatClient {
             // , 'usertype= :username!username@username.tmi.twitch.tv PRIVMSG #channelname :textmsg'
             const lastPart = msgData[msgData.length - 1]
             // drop channel name prefix
-            let messageText = lastPart.split(`${this.#settings.channelName} :`).pop()
+            let messageText = lastPart.split(`#${this.#settings.channel} :`).pop()
 
             // checks for the /me ACTION usage and gets the specific message
             if (messageText.split(" ").includes("ACTION")) {

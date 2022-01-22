@@ -1,3 +1,6 @@
+html, body { margin: 0; width: 100%; height: 100%; }
+/* body { box-sizing: border-box; padding: 8px; } */
+body { position: relative; }
 #world {
   color: #ffffff;
   font-size: 25px;
@@ -5,4 +8,12 @@
   text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
   text-transform: uppercase;
   text-shadow: 1px 1px 2px #333, 0px 0px 1px #555;
+}
+#showEmote {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 1s;
+}
+#showEmote.visible {
+  opacity: 1;
 }
