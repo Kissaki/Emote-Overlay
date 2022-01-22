@@ -342,19 +342,19 @@ class Display {
             const emoteName = messageText.substring(from, to + 1)
 
             const emoteLink = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteID}/default/dark/2.0`;
-            return this.showEmoteEvent(new Emote(emoteName, emoteLink))
+            return this.#showEmoteEvent(new Emote(emoteName, emoteLink))
         }
 
         let words = messageText.split(" ")
         let firstEmote = this.#emotes.findFirstEmoteInMessage(words)
         if (firstEmote !== null) {
-            return this.showEmoteEvent(new Emote(firstEmote.emoteName, firstEmote.emoteURL))
+            return this.#showEmoteEvent(new Emote(firstEmote.emoteName, firstEmote.emoteURL))
         }
     }
     /**
      * @param {Emote} emote 
      */
-    showEmoteEvent(emote) {
+    #showEmoteEvent(emote) {
         let secondsDiff = (new Date().getTime() - new Date(this.#showEmoteCooldownRef).getTime()) / 1000;
         console.debug(`showEmote command time since last invocation: ${secondsDiff}s`)
 
@@ -362,12 +362,12 @@ class Display {
         if (cooldown > secondsDiff) return
         this.#showEmoteCooldownRef = new Date();
 
-        this.createImage(emote)
+        this.#createImage(emote)
     }
     /**
      * @param {Emote} emote 
      */
-    createImage(emote) {
+    #createImage(emote) {
         const emoteDomEl = document.getElementById('showEmote')
         const emoteEl = $("#showEmote")
 
