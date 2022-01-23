@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "deno bundle main.ts",
+            "label": "deno bundle main.ts main.bundle.js",
             "type": "shell",
-            "command": "deno bundle main.ts",
+            "command": "deno bundle main.ts main.bundle.js",
             "group": {
                 "kind": "build",
                 "isDefault": true

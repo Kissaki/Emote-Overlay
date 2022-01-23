@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
-        "lib": ["dom", "dom.iterable", "es2017"]
+        "target": "es5",
+        "module": "commonjs",
+        "lib": ["dom"],
+        "sourceMap": true
     }
 }

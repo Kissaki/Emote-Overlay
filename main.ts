@@ -1,14 +1,7 @@
 'use strict'
 
-document.getElementById('debug').innerText = 'test'
-console.info = (text) => { document.getElementById('debug').innerText = text}
-console.error = (text) => { document.getElementById('debug').innerText = text }
-console.debug = (text) => {
-    document.getElementById('debug').innerText = text
-}
-
 class Settings {
-    showEmoteCommands: Array<string> = ['!showemote', '!#showemote', '!showe', '!show', '!s']
+    showEmoteCommands: string[] = ['!showemote', '!#showemote', '!showe', '!show', '!s']
     channel: string
 
     streakEnabled: boolean
