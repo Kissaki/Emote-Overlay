@@ -62,14 +62,14 @@ class Emotes {
         this.#enable7TV = enable7TV
     }
     async init() {
-        this.twitchChannelID = await this.#fetchTwitchChannelID(this.#channelName),
-        this.#fetchEmotes()
+        this.twitchChannelID = await this._fetchTwitchChannelID(this.#channelName),
+        this._fetchEmotes()
     }
     /**
      * @param {string} channelName
      * @returns {int}
      */
-    async #fetchTwitchChannelID(channelName) {
+    async _fetchTwitchChannelID(channelName) {
         console.debug(`Fetching Twitch channel ID for channel ${channelName}…`)
 
         let url = this.#proxyurl + 'https://api.ivr.fi/twitch/resolve/' + channelName
@@ -87,16 +87,16 @@ class Emotes {
         console.debug(`Identified Twitch channel as ID ${twitchChannelID}`)
         return twitchChannelID
     }
-    async #fetchEmotes() {
+    async _fetchEmotes() {
         console.debug('Fetching emotes…')
 
         const results = await Promise.allSettled([
-            this.#fetchFFZChannel(),
-            this.#fetchFFZGlobal(),
-            this.#fetchBTTVChannel(),
-            this.#fetchBTTVGlobal(),
-            this.#fetch7TVChannel(),
-            this.#fetch7TVGlobal(),
+            this._fetchFFZChannel(),
+            this._fetchFFZGlobal(),
+            this._fetchBTTVChannel(),
+            this._fetchBTTVGlobal(),
+            this._fetch7TVChannel(),
+            this._fetch7TVGlobal(),
         ])
         const failed = []
         results.forEach(result => {
@@ -109,20 +109,20 @@ class Emotes {
         })
         const msg = `Successfully loaded ${this.emotes.length} emotes.`
         console.info(msg)
-        this.#showMessage(msg)
+        this.showMessage(msg)
         if (failed.length > 0) {
             console.error('Failed to fetch emotes', ...failed)
-            this.#showMessage('Failed to fetch some emotes. ' + failed.join('<br />'))
+            this.showMessage('Failed to fetch some emotes. ' + failed.join('<br />'))
         }
     }
-    #showMessage(html) {
+    showMessage(html) {
         const domEl = document.createElement('div')
         domEl.classList.add('error')
         domEl.innerHTML = html
         document.getElementById('errors').appendChild(domEl)
         setTimeout(() => domEl.remove(), 2000)
     }
-    async #fetchFFZChannel() {
+    async _fetchFFZChannel() {
         const response = await fetch(this.#proxyurl + 'https://api.frankerfacez.com/v1/room/' + this.#channelName, {
             method: 'GET',
         })
@@ -148,132 +148,122 @@ class Emotes {
         console.debug(`Identified ${result.length} FFZ Channel emotes`)
         return result
     }
-    #fetchFFZGlobal() {
-        return fetch(this.#proxyurl + 'https://api.frankerfacez.com/v1/set/global', {
+    async _fetchFFZGlobal() {
+        const response = await fetch(this.#proxyurl + 'https://api.frankerfacez.com/v1/set/global', {
             method: 'GET',
         })
-        .then(async res => await res.json())
-        .then(json => {
-            if (json.error) return Promise.reject(`Failed to get FFZ Global emotes. Error response: ${json.error}`)
+        const json = await response.json()
+        if (json.error) return Promise.reject(`Failed to get FFZ Global emotes. Error response: ${json.error}`)
 
-            let res = []
+        let res = []
 
-            const emoteSets = json.sets
-            const setName = Object.keys(emoteSets)
-            for (var k = 0; k < setName.length; ++k) {
-                const key = setName[k]
+        const emoteSets = json.sets
+        const setName = Object.keys(emoteSets)
+        for (var k = 0; k < setName.length; ++k) {
+            const key = setName[k]
 
-                const emotes = emoteSets[key].emoticons
-                for (var i = 0; i < emotes.length; ++i) {
-                    const emote = emotes[i]
+            const emotes = emoteSets[key].emoticons
+            for (var i = 0; i < emotes.length; ++i) {
+                const emote = emotes[i]
 
-                    const emoteURL = emotes[i].urls['2'] ? emotes[i].urls['2'] : emotes[i].urls['1'];
-                    const httpsURL = 'https://' + emoteURL.split('//').pop()
-                    res.push(new Emote(emote.name, httpsURL))
-                }
+                const emoteURL = emotes[i].urls['2'] ? emotes[i].urls['2'] : emotes[i].urls['1'];
+                const httpsURL = 'https://' + emoteURL.split('//').pop()
+                res.push(new Emote(emote.name, httpsURL))
             }
+        }
 
         console.debug(`Identified ${res.length} FFZ Global emotes`)
-            return res
-        })
+        return res
     }
-    #fetchBTTVChannel() {
-        return fetch(this.#proxyurl + 'https://api.betterttv.net/3/cached/users/twitch/' + this.twitchChannelID, {
+    async _fetchBTTVChannel() {
+        const response = await fetch(this.#proxyurl + 'https://api.betterttv.net/3/cached/users/twitch/' + this.twitchChannelID, {
             method: 'GET',
         })
-        .then(async res => await res.json())
-        .then(json => {
-            if (json.error) return Promise.reject(`Failed to get BTTV Channel emotes. Error response: ${json.error}`)
+        const json = await response.json()
+        if (json.error) return Promise.reject(`Failed to get BTTV Channel emotes. Error response: ${json.error}`)
 
-            let res = []
+        let res = []
 
-            for (var i = 0; i < json.channelEmotes.length; ++i) {
-                const emote = json.channelEmotes[i]
+        for (var i = 0; i < json.channelEmotes.length; ++i) {
+            const emote = json.channelEmotes[i]
 
-                res.push({
-                    emoteName: emote.code,
-                    emoteURL: `https://cdn.betterttv.net/emote/${emote.id}/2x`,
-                });
-            }
-            for (var i = 0; i < json.sharedEmotes.length; ++i) {
-                let emote = json.sharedEmotes[i]
+            res.push({
+                emoteName: emote.code,
+                emoteURL: `https://cdn.betterttv.net/emote/${emote.id}/2x`,
+            });
+        }
+        for (var i = 0; i < json.sharedEmotes.length; ++i) {
+            let emote = json.sharedEmotes[i]
 
-                res.push(new Emote(emote.code, `https://cdn.betterttv.net/emote/${emote.id}/2x`))
-            }
+            res.push(new Emote(emote.code, `https://cdn.betterttv.net/emote/${emote.id}/2x`))
+        }
 
-            console.debug(`Identified ${res.length} BTTV Channel emotes`)
-            return res
-        })
+        console.debug(`Identified ${res.length} BTTV Channel emotes`)
+        return res
     }
-    #fetchBTTVGlobal() {
-        return fetch(this.#proxyurl + 'https://api.betterttv.net/3/cached/emotes/global', {
+    async _fetchBTTVGlobal() {
+        const response = await fetch(this.#proxyurl + 'https://api.betterttv.net/3/cached/emotes/global', {
             method: 'GET',
         })
-        .then(async res => await res.json())
-        .then(json => {
-            if (json.error) return Promise.reject(`Failed to get BTTV Global emotes. Error response: ${json.error}`)
-            if (json.message) return Promise.reject(`Failed to get BTTV Global emotes. Message: ${json.message}`)
+        const json = await response.json()
+        if (json.error) return Promise.reject(`Failed to get BTTV Global emotes. Error response: ${json.error}`)
+        if (json.message) return Promise.reject(`Failed to get BTTV Global emotes. Message: ${json.message}`)
 
-            let res = []
+        let res = []
 
-            for (var i = 0; i < json.length; i++) {
-                let emote = json[i]
+        for (var i = 0; i < json.length; i++) {
+            let emote = json[i]
 
-                res.push(new Emote(emote.code, `https://cdn.betterttv.net/emote/${emote.id}/2x`))
-            }
+            res.push(new Emote(emote.code, `https://cdn.betterttv.net/emote/${emote.id}/2x`))
+        }
 
-            console.debug(`Identified ${res.length} BTTV Global emotes`)
-            return res
-        })
+        console.debug(`Identified ${res.length} BTTV Global emotes`)
+        return res
     }
     /**
      * @returns {Array<Emote>}
      */
-    #fetch7TVChannel() {
-        if (!this.#enable7TV) return Promise.resolve([])
+    async _fetch7TVChannel() {
+        if (!this.#enable7TV) return []
 
-        return fetch(this.#proxyurl + `https://api.7tv.app/v2/users/${this.#channelName}/emotes`, {
+        const response = await fetch(this.#proxyurl + `https://api.7tv.app/v2/users/${this.#channelName}/emotes`, {
             method: 'GET',
         })
-        .then(async res => await res.json())
-        .then(json => {
-            if (json.status !== 200) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
-            if (json.error) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
+        const json = await response.json()
+        if (json.status !== 200) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
+        if (json.error) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
 
-            let res = []
+        let res = []
 
-            for (var i = 0; i < json.length; ++i) {
-                let emote = json[i]
+        for (var i = 0; i < json.length; ++i) {
+            let emote = json[i]
 
-                res.push(new Emote(emote.name, emote.urls[1][1]))
-            }
+            res.push(new Emote(emote.name, emote.urls[1][1]))
+        }
 
-            console.debug(`Identified ${res.length} 7TV Channel emotes`)
-            return res
-        })
+        console.debug(`Identified ${res.length} 7TV Channel emotes`)
+        return res
     }
-    #fetch7TVGlobal() {
+    async _fetch7TVGlobal() {
         if (!this.#enable7TV) return Promise.resolve([])
 
-        return fetch(this.#proxyurl + `https://api.7tv.app/v2/emotes/global`, {
+        const response = await fetch(this.#proxyurl + `https://api.7tv.app/v2/emotes/global`, {
             method: 'GET',
         })
-        .then(async res => await res.json())
-        .then(json => {
-            if (json.status !== 200) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
-            if (json.error) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
+        const json = await response.json()
+        if (json.status !== 200) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
+        if (json.error) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
 
-            let res = []
+        let res = []
 
-            for (var i = 0; i < json.length; ++i) {
-                let emote = json[i]
+        for (var i = 0; i < json.length; ++i) {
+            let emote = json[i]
 
-                res.push(new Emote(emote.name, emote.urls[1][1]))
-            }
+            res.push(new Emote(emote.name, emote.urls[1][1]))
+        }
 
-            console.debug(`Identified ${res.length} 7TV Global emotes`)
-            return res
-        })
+        console.debug(`Identified ${res.length} 7TV Global emotes`)
+        return res
     }
     /**
      * 
@@ -336,19 +326,19 @@ class EmoteShower {
             const emoteName = messageText.substring(from, to + 1)
 
             const emoteLink = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteID}/default/dark/2.0`;
-            return this.#showEmoteEvent(new Emote(emoteName, emoteLink))
+            return this._showEmoteEvent(new Emote(emoteName, emoteLink))
         }
 
         let words = messageText.split(' ')
         let firstEmote = this.#emotes.findFirstEmoteInMessage(words)
         if (firstEmote !== null) {
-            return this.#showEmoteEvent(new Emote(firstEmote.emoteName, firstEmote.emoteURL))
+            return this._showEmoteEvent(new Emote(firstEmote.emoteName, firstEmote.emoteURL))
         }
     }
     /**
      * @param {Emote} emote 
      */
-    #showEmoteEvent(emote) {
+    _showEmoteEvent(emote) {
         const cooldown = this.#settings.showEmoteCooldown
         let secondsDiff = (new Date().getTime() - this.#showEmoteCooldownRef.getTime()) / 1000;
         console.debug(`showEmote command time since last invocation: ${secondsDiff}s (cooldown ${cooldown})`)
@@ -356,12 +346,12 @@ class EmoteShower {
 
         this.#showEmoteCooldownRef = new Date();
 
-        this.#createImage(emote)
+        this._createImage(emote)
     }
     /**
      * @param {Emote} emote 
      */
-    #createImage(emote) {
+    _createImage(emote) {
         console.debug(`creating showEmote for ${emote.emoteName}…`)
         const minMargin = 8
         const transitionDurationS = 1
@@ -597,17 +587,17 @@ class ChatClient {
             if (messageText.split(' ').includes('ACTION')) {
                 messageText = messageText.split('ACTION ').pop().split('')[0]
             }
-            this.#onChatMessage(messageText, msgData)
+            this._onChatMessage(messageText, msgData)
         }
     }
-    #onChatMessage(messageText, messageFull) {
-        if (this.#startsWithShowEmoteCommand(messageText)) {
+    _onChatMessage(messageText, messageFull) {
+        if (this._startsWithShowEmoteCommand(messageText)) {
             this.#display.showEmote(messageText, messageFull);
         }
 
         this.#streakTracker.findEmoteStreaks(messageText, messageFull);
     }
-    #startsWithShowEmoteCommand(messageText) {
+    _startsWithShowEmoteCommand(messageText) {
         const lower = messageText.toLowerCase()
         for (let i = 0; i < this.#settings.showEmoteCommands.length; ++i) {
             let cmd = this.#settings.showEmoteCommands[i]
@@ -620,10 +610,13 @@ class ChatClient {
 }
 
 (async () => {
+    document.getElementById('init').innerText = 'Initializing Emote Overlay…'
+
     let settings = new Settings()
 
     if (settings.debug) {
         console.info('Setting up debug mode (logging additional information)…')
+        document.getElementById('debug').style.display = 'block'
         const log = (...msg) => { document.getElementById('debug').innerText = msg.join(', ') }
         console.debug = log
         console.error = log
@@ -635,13 +628,14 @@ class ChatClient {
     console.info(`The streak module is ${settings.streakEnabled} and the showEmote module is ${settings.showEmoteEnabled}`);
 
     let emotes = new Emotes(settings.channel, settings.sevenTVEnabled)
-    await emotes.init()
 
     let display = new EmoteShower(settings, emotes)
     let streakTracker = new StreakTracker(settings, emotes)
 
     let chat = new ChatClient(settings, display, streakTracker)
-    setTimeout(() => {
+    setTimeout(async () => {
+        await emotes.init()
         chat.connect()
-    }, 10 * 1000)
+        document.getElementById('init').style.display = 'none'
+    }, 1 * 1000)
 })()
