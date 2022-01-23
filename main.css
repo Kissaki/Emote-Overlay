@@ -11,6 +11,7 @@ body { position: relative; }
 }
 #main {
   position: absolute;
+  /* left: 35; bottom: 35; */
 }
 .showEmote {
   position: absolute;
@@ -19,4 +20,18 @@ body { position: relative; }
 }
 .showEmote.visible {
   opacity: 1;
+}
+#errors {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#debug {
+  width: 100%;
+  min-height: 100px;
+  background: lightgrey;
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }

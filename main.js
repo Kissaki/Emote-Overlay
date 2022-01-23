@@ -8,22 +8,22 @@ class Settings {
         console.debug('Using settings', this)
     }
     parseFromURL() {
-        let params = new URL(document.location).searchParams
+        let params = new URL(document.location.href).searchParams
 
-        this.channel = params.get("channel")?.toLowerCase()
+        this.channel = params.has('channel') ? params.get('channel').toLowerCase() : null
 
         // show emote streaks
-        this.streakEnabled = !params.has("streakEnabled") || params.get('streakEnabled') != 0
-        this.minStreak = parseInt(params.get("minStreak") ?? 5)
+        this.streakEnabled = !params.has('streakEnabled') || params.get('streakEnabled') != '0'
+        this.minStreak = params.has('minStreak') ? parseInt(params.get('minStreak')) : 5
 
         // enable show emote command
-        this.showEmoteEnabled = !params.has("showEmoteEnabled") || params.get("showEmoteEnabled") != 0
-        this.showEmoteSizeMultiplier = parseFloat(params.get("showEmoteSizeMultiplier") ?? 1.0)
-        this.showEmoteCooldown = parseFloat(params.get("showEmoteCooldown") ?? 6.0)
+        this.showEmoteEnabled = !params.has('showEmoteEnabled') || params.get('showEmoteEnabled') != '0'
+        this.showEmoteSizeMultiplier = params.has('showEmoteSizeMultiplier') ? parseFloat(params.get('showEmoteSizeMultiplier')) : 1.0
+        this.showEmoteCooldown = params.has('showEmoteCooldown') ? parseFloat(params.get('showEmoteCooldown')) : 6.0
 
-        this.sevenTVEnabled = !params.has("7tv") || params.get("7tv") != 0
+        this.sevenTVEnabled = !params.has('7tv') || params.get('7tv') != '0'
 
-        this.debug = params.has("debug")
+        this.debug = params.has('debug')
     }
     validate() {
         if (this.channel === null) throw 'Missing required `channel` configuration'
@@ -44,7 +44,7 @@ class Emote {
 
 class Emotes {
     // #proxyurl = 'https://cors-anywhere.herokuapp.com/';
-    #proxyurl = "https://tpbcors.herokuapp.com/";
+    #proxyurl = 'https://tpbcors.herokuapp.com/';
 
     /**
      * @type {Array<Emote>}
@@ -72,10 +72,10 @@ class Emotes {
     async #fetchTwitchChannelID(channelName) {
         console.debug(`Fetching Twitch channel ID for channel ${channelName}…`)
 
-        let url = this.#proxyurl + "https://api.ivr.fi/twitch/resolve/" + channelName
+        let url = this.#proxyurl + 'https://api.ivr.fi/twitch/resolve/' + channelName
         let twitchChannelID = await fetch(url, {
-            method: "GET",
-            headers: { "User-Agent": "api.roaringiron.com/emoteoverlay" },
+            method: 'GET',
+            headers: { 'User-Agent': 'api.roaringiron.com/emoteoverlay' },
         })
         .then(async res => await res.json())
         .then(json => {
@@ -109,15 +109,22 @@ class Emotes {
         })
         const msg = `Successfully loaded ${this.emotes.length} emotes.`
         console.info(msg)
-        $("#errors").text(msg).delay(2000).fadeOut(300);
+        this.#showMessage(msg)
         if (failed.length > 0) {
             console.error('Failed to fetch emotes', ...failed)
-            $("#errors").text(failed.join("<br />")).delay(5000).fadeOut(300);
+            this.#showMessage('Failed to fetch some emotes. ' + failed.join('<br />'))
         }
     }
+    #showMessage(html) {
+        const domEl = document.createElement('div')
+        domEl.classList.add('error')
+        domEl.innerHTML = html
+        document.getElementById('errors').appendChild(domEl)
+        setTimeout(() => domEl.remove(), 2000)
+    }
     async #fetchFFZChannel() {
-        const response = await fetch(this.#proxyurl + "https://api.frankerfacez.com/v1/room/" + this.#channelName, {
-            method: "GET",
+        const response = await fetch(this.#proxyurl + 'https://api.frankerfacez.com/v1/room/' + this.#channelName, {
+            method: 'GET',
         })
 
         const json = await await response.json()
@@ -133,8 +140,8 @@ class Emotes {
             for (var i = 0; i < emotes.length; ++i) {
                 const emote = emotes[i]
 
-                const emoteURL = emote.urls["2"] ? emote.urls["2"] : emote.urls["1"]
-                const httpsURL = "https://" + emoteURL.split("//").pop()
+                const emoteURL = emote.urls['2'] ? emote.urls['2'] : emote.urls['1']
+                const httpsURL = 'https://' + emoteURL.split('//').pop()
                 result.push(new Emote(emote.name, httpsURL))
             }
         }
@@ -142,8 +149,8 @@ class Emotes {
         return result
     }
     #fetchFFZGlobal() {
-        return fetch(this.#proxyurl + "https://api.frankerfacez.com/v1/set/global", {
-            method: "GET",
+        return fetch(this.#proxyurl + 'https://api.frankerfacez.com/v1/set/global', {
+            method: 'GET',
         })
         .then(async res => await res.json())
         .then(json => {
@@ -160,8 +167,8 @@ class Emotes {
                 for (var i = 0; i < emotes.length; ++i) {
                     const emote = emotes[i]
 
-                    const emoteURL = emotes[i].urls["2"] ? emotes[i].urls["2"] : emotes[i].urls["1"];
-                    const httpsURL = "https://" + emoteURL.split("//").pop()
+                    const emoteURL = emotes[i].urls['2'] ? emotes[i].urls['2'] : emotes[i].urls['1'];
+                    const httpsURL = 'https://' + emoteURL.split('//').pop()
                     res.push(new Emote(emote.name, httpsURL))
                 }
             }
@@ -171,8 +178,8 @@ class Emotes {
         })
     }
     #fetchBTTVChannel() {
-        return fetch(this.#proxyurl + "https://api.betterttv.net/3/cached/users/twitch/" + this.twitchChannelID, {
-            method: "GET",
+        return fetch(this.#proxyurl + 'https://api.betterttv.net/3/cached/users/twitch/' + this.twitchChannelID, {
+            method: 'GET',
         })
         .then(async res => await res.json())
         .then(json => {
@@ -199,8 +206,8 @@ class Emotes {
         })
     }
     #fetchBTTVGlobal() {
-        return fetch(this.#proxyurl + "https://api.betterttv.net/3/cached/emotes/global", {
-            method: "GET",
+        return fetch(this.#proxyurl + 'https://api.betterttv.net/3/cached/emotes/global', {
+            method: 'GET',
         })
         .then(async res => await res.json())
         .then(json => {
@@ -226,7 +233,7 @@ class Emotes {
         if (!this.#enable7TV) return Promise.resolve([])
 
         return fetch(this.#proxyurl + `https://api.7tv.app/v2/users/${this.#channelName}/emotes`, {
-            method: "GET",
+            method: 'GET',
         })
         .then(async res => await res.json())
         .then(json => {
@@ -249,7 +256,7 @@ class Emotes {
         if (!this.#enable7TV) return Promise.resolve([])
 
         return fetch(this.#proxyurl + `https://api.7tv.app/v2/emotes/global`, {
-            method: "GET",
+            method: 'GET',
         })
         .then(async res => await res.json())
         .then(json => {
@@ -314,16 +321,16 @@ class EmoteShower {
     showEmote(messageText, messageFull) {
         if (!this.#settings.showEmoteEnabled) return
 
-        const msgEmotesDataIndex = messageFull[4].startsWith("emotes=") ? 4 : 5;
+        const msgEmotesDataIndex = messageFull[4].startsWith('emotes=') ? 4 : 5;
         const emotesData = messageFull[msgEmotesDataIndex]
-        const emoteUsedIDs = emotesData.split("emotes=").pop();
+        const emoteUsedIDs = emotesData.split('emotes=').pop();
         // Twitch emote from msg data field
         if (emoteUsedIDs.length > 0) {
-            const emoteDataSplit = emoteUsedIDs.split(":")
+            const emoteDataSplit = emoteUsedIDs.split(':')
             const emoteID = emoteDataSplit[0]
             // 'x-y'
             const substrRange = emoteDataSplit[1]
-            const substrIndex = substrRange.split("-")
+            const substrIndex = substrRange.split('-')
             const from = parseInt(substrIndex[0])
             const to = parseInt(substrIndex[1])
             const emoteName = messageText.substring(from, to + 1)
@@ -332,7 +339,7 @@ class EmoteShower {
             return this.#showEmoteEvent(new Emote(emoteName, emoteLink))
         }
 
-        let words = messageText.split(" ")
+        let words = messageText.split(' ')
         let firstEmote = this.#emotes.findFirstEmoteInMessage(words)
         if (firstEmote !== null) {
             return this.#showEmoteEvent(new Emote(firstEmote.emoteName, firstEmote.emoteURL))
@@ -342,7 +349,7 @@ class EmoteShower {
      * @param {Emote} emote 
      */
     #showEmoteEvent(emote) {
-        const cooldown = parseInt(this.#settings.showEmoteCooldown)
+        const cooldown = this.#settings.showEmoteCooldown
         let secondsDiff = (new Date().getTime() - this.#showEmoteCooldownRef.getTime()) / 1000;
         console.debug(`showEmote command time since last invocation: ${secondsDiff}s (cooldown ${cooldown})`)
         if (cooldown > secondsDiff) return
@@ -388,6 +395,16 @@ class EmoteShower {
     }
 }
 
+class StreakData {
+    /** @type {number} */
+    streak
+
+    /** @type {string} */
+    emote
+
+    /** @type {string} */
+    emoteURL
+}
 class StreakTracker {
     /** @type {Settings} */
     #settings = null
@@ -395,19 +412,30 @@ class StreakTracker {
     /** @type {Emotes} */
     #emotes
 
+    /** @type {StreakData} */
+    currentStreak = new StreakData()
+    /** @type {number} */
+    streakCD
+
+    /**
+     * @param {Settings} settings
+     * @param {Emotes} emotes
+     */
     constructor(settings, emotes) {
         this.#settings = settings
         this.#emotes = emotes
 
         // the current emote streak being used in chat
         this.currentStreak = { streak: 1, emote: null, emoteURL: null }
-        // the current emote being used in chat
-        this.currentEmote
         this.streakCD = new Date().getTime();
     }
 
+    /**
+     * @param {string} messageText
+     * @param {string[]} messageData
+     */
     findEmoteStreaks(messageText, messageData) {
-        const words = messageText.split(" ");
+        const words = messageText.split(' ');
         // Matches current streak
         if (words.includes(this.currentStreak.emote)) {
             this.currentStreak.streak++
@@ -415,11 +443,11 @@ class StreakTracker {
             return
         }
 
-        const emoteDataIndex = messageData[4].startsWith("emotes=") ? 4 : messageData[5].startsWith("emote-only=") ? 6 : 5;
-        const emoteData = messageData[emoteDataIndex].split("emotes=").pop();
+        const emoteDataIndex = messageData[4].startsWith('emotes=') ? 4 : messageData[5].startsWith('emote-only=') ? 6 : 5;
+        const emoteData = messageData[emoteDataIndex].split('emotes=').pop();
         // New streak from twitch message twitch emote data
         if (emoteData.length > 1) {
-            const idAndIndex = emoteData.split(":")
+            const idAndIndex = emoteData.split(':')
             const emoteID = idAndIndex[0]
             const index = idAndIndex[1].split('-')
             const from = parseInt(index[0])
@@ -455,13 +483,10 @@ class StreakTracker {
 
         domEl.innerHTML += text
 
-        //$("#main").css("left", "35"); // 35
-        //$("#main").css("bottom", "35"); // 70
-
-        gsap.to("#main", 0.2, {
+        gsap.to('#main', 0.2, {
             scaleX: 1.2,
             scaleY: 1.2,
-            onComplete: () => { gsap.to("#main", 0.15, { scaleX: 1, scaleY: 1 }) }
+            onComplete: () => { gsap.to('#main', 0.15, { scaleX: 1, scaleY: 1 }) }
         })
 
         this.streakCD = new Date().getTime()
@@ -470,6 +495,9 @@ class StreakTracker {
         // Initiate continuous streak display until it subsides
         const intervalID = setInterval(this.streakTick.bind(this), 1 * 1000, () => clearInterval(intervalID))
     }
+    /**
+     * @param {() => void} clearCallback
+     */
     streakTick(clearCallback) {
         const timeMS = new Date().getTime()
         const diff = timeMS - this.streakCD
@@ -480,26 +508,20 @@ class StreakTracker {
             this.streakCD = new Date().getTime()
 
             // Initiate hide animation
-            gsap.to("#main", 0.2, { x: 0, y: 0, scaleX: 0, scaleY: 0, delay: 0.5, onComplete: () => { this.streakCD = new Date().getTime() } });
+            gsap.to('#main', 0.2, { x: 0, y: 0, scaleX: 0, scaleY: 0, delay: 0.5, onComplete: () => { this.streakCD = new Date().getTime() } });
             clearCallback()
         }
     }
 }
 
 class ChatClient {
-    /**
-     * @type {Settings}
-     */
+    /** @type {Settings} */
     #settings = null
 
-    /**
-     * @type {WebSocket}
-     */
+    /** @type {WebSocket} */
     #websocket = null
 
-    /**
-     * @type {EmoteShower}
-     */
+    /** @type {EmoteShower} */
     #display = null
 
     /** @type {StreakTracker} */
@@ -517,7 +539,7 @@ class ChatClient {
     }
 
     connect() {
-        this.#websocket = new WebSocket("wss://irc-ws.chat.twitch.tv")
+        this.#websocket = new WebSocket('wss://irc-ws.chat.twitch.tv')
         this.#websocket.addEventListener('open', this.onOpen.bind(this))
         this.#websocket.addEventListener('close', this.onClose.bind(this))
         this.#websocket.addEventListener('error', this.onError.bind(this))
@@ -528,10 +550,10 @@ class ChatClient {
      * @param {Event} event 
      */
     onOpen() {
-        this.#websocket.send("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership")
-        this.#websocket.send("PASS oauth:xd123")
-        this.#websocket.send("NICK justinfan123")
-        this.#websocket.send("JOIN #" + this.#settings.channel)
+        this.#websocket.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership')
+        this.#websocket.send('PASS oauth:xd123')
+        this.#websocket.send('NICK justinfan123')
+        this.#websocket.send('JOIN #' + this.#settings.channel)
     }
     /**
      * @param {CloseEvent} event 
@@ -546,7 +568,6 @@ class ChatClient {
     onError(event) {
         console.error(`ChatClient: Websocket error. Trying to close and reconnect.`, event)
         this.#websocket.close()
-        this.#websocket.connect()
     }
     /**
      * @this {ChatClient}
@@ -560,7 +581,7 @@ class ChatClient {
 
         if (msgData.length == 1 && msgData[0].startsWith('PING')) {
             console.debug('Sending PING response PONG…')
-            this.#websocket.send("PONG")
+            this.#websocket.send('PONG')
             return
         }
 
@@ -573,10 +594,10 @@ class ChatClient {
             let messageText = lastPart.split(`#${this.#settings.channel} :`).pop()
 
             // checks for the /me ACTION usage and gets the specific message
-            if (messageText.split(" ").includes("ACTION")) {
-                messageText = messageText.split("ACTION ").pop().split("")[0]
+            if (messageText.split(' ').includes('ACTION')) {
+                messageText = messageText.split('ACTION ').pop().split('')[0]
             }
-            this.#onChatMessage(messageText, msgData);
+            this.#onChatMessage(messageText, msgData)
         }
     }
     #onChatMessage(messageText, messageFull) {
@@ -601,10 +622,19 @@ class ChatClient {
 (async () => {
     let settings = new Settings()
 
+    if (settings.debug) {
+        console.info('Setting up debug mode (logging additional information)…')
+        const log = (...msg) => { document.getElementById('debug').innerText = msg.join(', ') }
+        console.debug = log
+        console.error = log
+        console.info = log
+        console.log = log
+    }
+
     console.info(`Using channel ${settings.channel}`, settings)
     console.info(`The streak module is ${settings.streakEnabled} and the showEmote module is ${settings.showEmoteEnabled}`);
 
-    let emotes = new Emotes(settings.channel, settings.enable7TV)
+    let emotes = new Emotes(settings.channel, settings.sevenTVEnabled)
     await emotes.init()
 
     let display = new EmoteShower(settings, emotes)
