@@ -125,7 +125,7 @@ class Emotes {
             method: 'GET',
         })
 
-        const json = await await response.json()
+        const json = await response.json()
         if (json.error) return Promise.reject(`Failed to get FFZ Channel emotes. Error response: ${json.error}`)
 
         let result = []
