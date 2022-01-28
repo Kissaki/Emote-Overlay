@@ -73,17 +73,15 @@ class Emotes {
         console.debug(`Fetching Twitch channel ID for channel ${channelName}…`)
 
         let url = this.#proxyurl + 'https://api.ivr.fi/twitch/resolve/' + channelName
-        let twitchChannelID = await fetch(url, {
+        let res = await fetch(url, {
             method: 'GET',
             headers: { 'User-Agent': 'api.roaringiron.com/emoteoverlay' },
         })
-        .then(async res => await res.json())
-        .then(json => {
-            if (json.status != 200) return Promise.reject(`Failed to get Twitch channel ID. Response status code is not 200 OK but ${json.status}`)
-            if (json.error) return Promise.reject(`Failed to get Twitch channel ID. Error response: ${json.error}`)
+        let json = await res.json()
+        if (json.status != 200) return Promise.reject(`Failed to get Twitch channel ID. Response status code is not 200 OK but ${json.status}`)
+        if (json.error) return Promise.reject(`Failed to get Twitch channel ID. Error response: ${json.error}`)
 
-            return json.id
-        }, err => Promise.reject(`Failed to fetch Twitch channel ID. Fetch error: ${err}`))
+        let twitchChannelID = json.id
         console.debug(`Identified Twitch channel as ID ${twitchChannelID}`)
         return twitchChannelID
     }
