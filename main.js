@@ -230,7 +230,7 @@ class Emotes {
             method: 'GET',
         })
         const json = await response.json()
-        if (json.status !== 200) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
+        if (json.status) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
         if (json.error) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
 
         let res = []
@@ -251,7 +251,7 @@ class Emotes {
             method: 'GET',
         })
         const json = await response.json()
-        if (json.status !== 200) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
+        if (json.status) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
         if (json.error) return Promise.reject(`Failed to get 7TV Channel emotes. Error response: ${json.error}`)
 
         let res = []
