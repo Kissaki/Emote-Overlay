@@ -258,15 +258,15 @@ const showEmoteEvent = (url) => {
     config.showEmoteCooldownRef = new Date();
 
     $("#showEmote").empty();
-    const [x, y] = getRandomCoords();
+    const [y, x] = getRandomCoords();
     let emoteEl = $("#showEmote");
     emoteEl.css("position", "absolute");
-    if (x > max_width / 2) {
+    if (x < max_width / 2) {
       emoteEl.css("left", x + "px");
     } else {
       emoteEl.css("right", (max_width - x) + "px");
     }
-    if (x > max_width / 2) {
+    if (y < max_height / 2) {
       emoteEl.css("top", y + "px");
     } else {
       emoteEl.css("bottom", (max_height - y) + "px");
