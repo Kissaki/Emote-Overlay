@@ -211,24 +211,24 @@ const streakEvent = () => {
     switch (config.emoteLocation) {
       default:
       case 1:
-        $("#main").css("top", "0");
-        $("#main").css("left", "0");
-        transformOrigin = "top left";
-        break;
-      case 2:
         $("#main").css("bottom", "0");
         $("#main").css("left", "0");
         transformOrigin = "bottom left";
         break;
-      case 3:
-        $("#main").css("bottom", "0");
-        $("#main").css("right", "0");
-        transformOrigin = "bottom right";
+      case 2:
+        $("#main").css("top", "0");
+        $("#main").css("left", "0");
+        transformOrigin = "top left";
         break;
-      case 4:
+      case 3:
         $("#main").css("top", "0");
         $("#main").css("right", "0");
         transformOrigin = "top right";
+        break;
+      case 4:
+        $("#main").css("bottom", "0");
+        $("#main").css("right", "0");
+        transformOrigin = "bottom right";
         break;
     }
 
