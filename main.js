@@ -205,23 +205,28 @@ const streakEvent = () => {
     $("#main").empty();
     $("#main").css("position", "absolute");
 
+    let transformOrigin = ""
     switch (config.emoteLocation) {
       default:
       case 1:
         $("#main").css("top", "0");
         $("#main").css("left", "0");
+        transformOrigin = "top left";
         break;
       case 2:
         $("#main").css("bottom", "0");
         $("#main").css("left", "0");
+        transformOrigin = "bottom left";
         break;
       case 3:
         $("#main").css("bottom", "0");
         $("#main").css("right", "0");
+        transformOrigin = "bottom right";
         break;
       case 4:
         $("#main").css("top", "0");
         $("#main").css("right", "0");
+        transformOrigin = "top right";
         break;
     }
 
@@ -233,7 +238,7 @@ const streakEvent = () => {
     gsap.to("#main", 0.2, {
       scaleX: 1.2,
       scaleY: 1.2,
-      onComplete: () => gsap.to("#main", 0.15, { scaleX: 1, scaleY: 1 }),
+      onComplete: () => gsap.to("#main", 0.15, { scaleX: 1, scaleY: 1, transformOrigin: transformOrigin }),
     });
 
     config.streakCooldown = new Date().getTime();
