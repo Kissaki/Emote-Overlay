@@ -322,7 +322,7 @@ const connect = () => {
       let message = parsedMessage.split(" ").includes("ACTION")
         ? parsedMessage.split("ACTION ").pop().split("")[0]
         : parsedMessage; // checks for the /me ACTION usage and gets the specific message
-      document.onchatmessage(message, messageFull);
+      document.onchatmessage(message, fullMessage);
       //if (message.toLowerCase().startsWith("!showemote") || message.toLowerCase().startsWith("!#showemote")) {
       //  showEmote(message, fullMessage);
       //}
