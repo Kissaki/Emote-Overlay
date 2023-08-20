@@ -156,7 +156,9 @@ const findUrlInEmotes = (emote) => {
   return null;
 };
 
-const getRandomCoords = () => [Math.floor(Math.random() * 720), Math.floor(Math.random() * 1280)];
+const max_height = 1080;
+const max_width = 1920;
+const getRandomCoords = () => [Math.floor(Math.random() * max_height), Math.floor(Math.random() * max_width)];
 
 const showEmote = (message, rawMessage) => {
   if (config.showEmoteEnabled) {
@@ -228,10 +230,10 @@ const streakEvent = () => {
       .append(" 󠀀  󠀀  x" + config.currentStreak.streak + " " + config.emoteStreakEndingText)
       .appendTo("#main");
 
-    gsap.to("#main", 0.15, {
+    gsap.to("#main", 0.2, {
       scaleX: 1.2,
       scaleY: 1.2,
-      onComplete: () => gsap.to("#main", 0.15, { scaleX: 1, scaleY: 1 }),
+      onComplete: () => gsap.to("#main", 0.15, { x: 0, y: 0, scaleX: 1, scaleY: 1 }),
     });
 
     config.streakCooldown = new Date().getTime();
@@ -257,9 +259,18 @@ const showEmoteEvent = (url) => {
 
     $("#showEmote").empty();
     const [x, y] = getRandomCoords();
-    $("#showEmote").css("position", "absolute");
-    $("#showEmote").css("left", x + "px");
-    $("#showEmote").css("top", y + "px");
+    let emoteEl = $("#showEmote");
+    emoteEl.css("position", "absolute");
+    if (x > max_width / 2) {
+      emoteEl.css("left", x + "px");
+    } else {
+      emoteEl.css("right", (max_width - x) + "px");
+    }
+    if (x > max_width / 2) {
+      emoteEl.css("top", y + "px");
+    } else {
+      emoteEl.css("bottom", (max_height - y) + "px");
+    }
 
     $("<img />", {
       src: url,
