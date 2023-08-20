@@ -158,9 +158,9 @@ const findUrlInEmotes = (emote) => {
   return null;
 };
 
-const max_height = 1080;
 const max_width = 1920;
-const getRandomCoords = () => [Math.floor(Math.random() * max_height), Math.floor(Math.random() * max_width)];
+const max_height = 1080;
+const getRandomCoords = () => [Math.floor(Math.random() * max_width), Math.floor(Math.random() * max_height)];
 
 const showEmote = (message, rawMessage) => {
   if (config.showEmoteEnabled) {
@@ -265,8 +265,8 @@ const showEmoteEvent = (url) => {
     config.showEmoteCooldownRef = new Date();
 
     $("#showEmote").empty();
-    const [y, x] = getRandomCoords();
-    let emoteEl = $("#showEmote");
+    const [x, y] = getRandomCoords();
+    const emoteEl = $("#showEmote");
     emoteEl.css("position", "absolute");
     if (x < max_width / 2) {
       emoteEl.css("left", x + "px");
