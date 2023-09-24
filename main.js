@@ -267,21 +267,29 @@ const showEmoteEvent = (url) => {
     $("#showEmote").empty();
     const [x, y] = getRandomCoords();
     const emoteEl = $("#showEmote");
-    emoteEl.css("position", "absolute");
+    let torigin = ''
+    // left
     if (x < max_width / 2) {
-      emoteEl.css("left", x + "px");
+      emoteEl.css("grid-template-columns", `${x}px auto 1fr`);
+      torigin += 'left';
+    // right
     } else {
-      emoteEl.css("right", (max_width - x) + "px");
+      emoteEl.css("grid-template-columns", `1fr auto ${max_width - x}px`);
+      torigin += 'right';
     }
+    // top
     if (y < max_height / 2) {
-      emoteEl.css("top", y + "px");
+      emoteEl.css("grid-template-rows", `${y}px auto 1fr`);
+      torigin += ' top';
+    // bottom
     } else {
-      emoteEl.css("bottom", (max_height - y) + "px");
+      emoteEl.css("grid-template-rows", `1fr auto ${max_height - y}px`);
+      torigin += ' bottom';
     }
 
     $("<img />", {
       src: url,
-      style: `transform: scale(${config.showEmoteSizeMultiplier}, ${config.showEmoteSizeMultiplier})`,
+      style: `transform: scale(${config.showEmoteSizeMultiplier}, ${config.showEmoteSizeMultiplier}); transform-origin: ${torigin};`,
     }).appendTo("#showEmote");
 
     gsap.to("#showEmote", 1, {
